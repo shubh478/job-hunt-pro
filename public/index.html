@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Hunt Pro</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  a { color: #60a5fa; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #1e293b; }
+  ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+
+  /* Nav */
+  .nav { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 16px; display: flex; align-items: center; gap: 4px; overflow-x: auto; }
+  .nav h1 { font-size: 16px; color: #3b82f6; margin-right: 20px; padding: 14px 0; white-space: nowrap; }
+  .nav-btn { background: none; border: none; color: #94a3b8; padding: 14px 12px; cursor: pointer; font-size: 13px; border-bottom: 2px solid transparent; transition: .2s; white-space: nowrap; }
+  .nav-btn:hover { color: #e2e8f0; }
+  .nav-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 20px; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; text-align: center; }
+  .stat-card .num { font-size: 28px; font-weight: 700; color: #3b82f6; }
+  .stat-card .label { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+  /* Alert banner */
+  .alert-banner { background: #422006; border: 1px solid #92400e; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; }
+  .alert-banner h3 { color: #fbbf24; font-size: 14px; margin-bottom: 8px; }
+  .alert-item { font-size: 13px; color: #fde68a; padding: 3px 0; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 8px 10px; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #334155; }
+  td { padding: 8px 10px; border-bottom: 1px solid #1e293b; font-size: 13px; }
+  tr:hover { background: #1e293b; }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+  .badge-WISHLIST { background: #334155; color: #94a3b8; }
+  .badge-APPLIED { background: #1e3a5f; color: #60a5fa; }
+  .badge-SCREENING { background: #3b2f63; color: #a78bfa; }
+  .badge-INTERVIEW { background: #1a3a2a; color: #4ade80; }
+  .badge-OFFER { background: #365314; color: #84cc16; }
+  .badge-REJECTED { background: #450a0a; color: #f87171; }
+  .badge-GHOSTED { background: #3f3f46; color: #a1a1aa; }
+  .badge-EASY { background: #14532d; color: #4ade80; }
+  .badge-MEDIUM { background: #422006; color: #fbbf24; }
+  .badge-HARD { background: #450a0a; color: #f87171; }
+  .badge-TODO { background: #334155; color: #94a3b8; }
+  .badge-REVIEW { background: #422006; color: #fbbf24; }
+  .badge-DONE { background: #14532d; color: #4ade80; }
+
+  /* Buttons */
+  .btn { padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 12px; font-weight: 500; transition: .2s; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-sm { padding: 3px 8px; font-size: 11px; }
+  .btn-danger { background: #991b1b; color: #fca5a5; }
+  .btn-danger:hover { background: #7f1d1d; }
+  .btn-ghost { background: transparent; color: #94a3b8; border: 1px solid #334155; }
+  .btn-ghost:hover { background: #1e293b; }
+  .btn-success { background: #166534; color: #bbf7d0; }
+  .btn-success:hover { background: #14532d; }
+  .btn-warn { background: #92400e; color: #fde68a; }
+
+  /* Filters */
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .chip { padding: 5px 12px; border-radius: 9999px; border: 1px solid #334155; background: transparent; color: #94a3b8; cursor: pointer; font-size: 12px; transition: .2s; }
+  .chip:hover { border-color: #3b82f6; color: #e2e8f0; }
+  .chip.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px; width: 92%; max-width: 580px; max-height: 88vh; overflow-y: auto; }
+  .modal h2 { font-size: 16px; margin-bottom: 14px; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 3px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; }
+  .form-group textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .section-header h2 { font-size: 18px; }
+
+  /* Prep */
+  .prep-category { margin-bottom: 20px; }
+  .prep-category h3 { font-size: 14px; color: #94a3b8; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 4px; }
+  .prep-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: .15s; }
+  .prep-item:hover { background: #1e293b; }
+  .prep-item .topic-name { flex: 1; font-size: 13px; }
+  .prep-item .resource-link { font-size: 11px; }
+  .progress-bar { background: #334155; border-radius: 9999px; height: 8px; margin-bottom: 16px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #22c55e); border-radius: 9999px; transition: width .4s; }
+  .progress-label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+
+  /* Resource & Search cards */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; transition: .2s; }
+  .card:hover { border-color: #3b82f6; transform: translateY(-1px); }
+  .card h3 { font-size: 15px; margin-bottom: 4px; }
+  .card p { font-size: 12px; color: #94a3b8; }
+
+  /* Job search */
+  .search-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-bar input { flex: 1; min-width: 180px; padding: 8px 12px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 14px; }
+  .search-bar input:focus { outline: none; border-color: #3b82f6; }
+  .portal-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .portal-link { display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 12px; transition: .2s; }
+  .portal-link:hover { border-color: #3b82f6; text-decoration: none; background: #334155; }
+  .job-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+  .job-card:hover { border-color: #475569; }
+  .job-card h3 { font-size: 15px; margin-bottom: 4px; }
+  .job-card .meta { font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
+  .job-card .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* Quick Apply */
+  .quick-apply-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .quick-apply-box h3 { font-size: 15px; margin-bottom: 12px; }
+  .generated-content { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; margin: 10px 0; white-space: pre-wrap; font-size: 13px; max-height: 300px; overflow-y: auto; }
+
+  /* Settings */
+  .settings-section { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .settings-section h3 { font-size: 15px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #334155; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 20px; right: 20px; background: #22c55e; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; z-index: 200; transform: translateY(80px); opacity: 0; transition: .3s; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { background: #ef4444; }
+
+  @media (max-width: 640px) {
+    .form-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <h1>Job Hunt Pro</h1>
+  <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="switchTab('search')">Job Search</button>
+  <button class="nav-btn" onclick="switchTab('applications')">Applications</button>
+  <button class="nav-btn" onclick="switchTab('quickapply')">Quick Apply</button>
+  <button class="nav-btn" onclick="switchTab('prep')">Prep</button>
+  <button class="nav-btn" onclick="switchTab('resources')">Resources</button>
+  <button class="nav-btn" onclick="switchTab('settings')">Settings</button>
+</nav>
+
+<div class="container">
+
+  <!-- ==================== DASHBOARD ==================== -->
+  <div id="tab-dashboard" class="tab active">
+    <div id="followup-banner"></div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="section-header">
+      <h2>Recent Applications</h2>
+      <div><button class="btn btn-primary" onclick="openAppModal()">+ Add Application</button></div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Company</th><th>Role</th><th>Status</th><th>Platform</th><th>Applied</th><th>Actions</th></tr></thead><tbody id="recent-table"></tbody></table></div>
+  </div>
+
+  <!-- ==================== JOB SEARCH ==================== -->
+  <div id="tab-search" class="tab">
+    <h2 style="margin-bottom:14px">Search Jobs</h2>
+    <div class="search-bar">
+      <input id="search-keywords" placeholder="Keywords (e.g. Java Developer, SDE 2)">
+      <input id="search-location" placeholder="Location (e.g. Bangalore, Remote)" style="max-width:220px">
+      <button class="btn btn-primary" onclick="searchJobs()">Search</button>
+    </div>
+    <p style="font-size:12px;color:#64748b;margin-bottom:12px">Quick search on portals (opens pre-filled search in new tab):</p>
+    <div class="portal-links" id="portal-links"></div>
+    <div id="search-results"></div>
+    <div id="search-empty" style="text-align:center;color:#64748b;padding:40px;font-size:14px">
+      Enter keywords above to search remote tech jobs, or click a portal link to search directly on job sites.
+    </div>
+  </div>
+
+  <!-- ==================== APPLICATIONS ==================== -->
+  <div id="tab-applications" class="tab">
+    <div class="section-header">
+      <h2>All Applications</h2>
+      <button class="btn btn-primary" onclick="openAppModal()">+ Add Application</button>
+    </div>
+    <div class="filters" id="status-filters"></div>
+    <div class="table-wrap"><table><thead><tr><th>Company</th><th>Role</th><th>Platform</th><th>Location</th><th>Salary</th><th>Status</th><th>Applied</th><th>Follow-up</th><th>Actions</th></tr></thead><tbody id="apps-table"></tbody></table></div>
+  </div>
+
+  <!-- ==================== QUICK APPLY ==================== -->
+  <div id="tab-quickapply" class="tab">
+    <h2 style="margin-bottom:14px">Quick Apply</h2>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:16px">Generate a personalized cover letter, copy it, and open the apply page — all in one click. Set up your profile in Settings first.</p>
+
+    <div class="quick-apply-box">
+      <h3>Generate Cover Letter</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Company</label><input id="qa-company" placeholder="Google"></div>
+        <div class="form-group"><label>Role</label><input id="qa-role" placeholder="SDE-2"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Template</label>
+          <select id="qa-template"></select>
+        </div>
+        <div class="form-group"><label>Apply URL (optional)</label><input id="qa-url" placeholder="https://..."></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="generateCover()">Generate</button>
+        <button class="btn btn-ghost" onclick="copyCover()">Copy to Clipboard</button>
+        <button class="btn btn-ghost" onclick="openApplyUrl()">Open Apply Page</button>
+        <button class="btn btn-success" onclick="saveAndTrack()">Save to Applications</button>
+      </div>
+    </div>
+
+    <div class="quick-apply-box" id="qa-preview" style="display:none">
+      <h3>Preview</h3>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:4px">Subject:</div>
+      <div id="qa-subject" style="font-size:14px;font-weight:500;margin-bottom:8px"></div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:4px">Body:</div>
+      <div class="generated-content" id="qa-body"></div>
+    </div>
+
+    <div class="quick-apply-box">
+      <h3>Send via Email</h3>
+      <p style="font-size:12px;color:#64748b;margin-bottom:10px">Send the generated cover letter as an email. Configure SMTP in Settings first.</p>
+      <div class="form-group"><label>Recipient Email</label><input id="qa-email-to" placeholder="hr@company.com"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label style="font-size:12px;color:#94a3b8"><input type="checkbox" id="qa-attach-resume" checked> Attach Resume</label>
+        <button class="btn btn-primary" onclick="sendEmailApply()">Send Email</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== INTERVIEW PREP ==================== -->
+  <div id="tab-prep" class="tab">
+    <div class="section-header">
+      <h2>Interview Prep</h2>
+      <button class="btn btn-primary" onclick="openPrepModal()">+ Add Topic</button>
+    </div>
+    <div class="progress-label" id="prep-progress-label"></div>
+    <div class="progress-bar"><div class="progress-fill" id="prep-progress-fill"></div></div>
+    <div id="prep-list"></div>
+  </div>
+
+  <!-- ==================== RESOURCES ==================== -->
+  <div id="tab-resources" class="tab">
+    <h2 style="margin-bottom:14px">Job Portals & Learning</h2>
+    <div class="card-grid" id="resource-grid"></div>
+  </div>
+
+  <!-- ==================== SETTINGS ==================== -->
+  <div id="tab-settings" class="tab">
+    <h2 style="margin-bottom:14px">Settings</h2>
+
+    <div class="settings-section">
+      <h3>Your Profile</h3>
+      <p style="font-size:12px;color:#64748b;margin-bottom:12px">This info is used to auto-fill cover letters.</p>
+      <div class="form-row">
+        <div class="form-group"><label>Full Name</label><input id="s-name"></div>
+        <div class="form-group"><label>Email</label><input id="s-email" type="email"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone</label><input id="s-phone"></div>
+        <div class="form-group"><label>Current Role</label><input id="s-current-role" placeholder="Software Engineer"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Experience (years)</label><input id="s-exp" placeholder="2"></div>
+        <div class="form-group"><label>LinkedIn URL</label><input id="s-linkedin"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>GitHub URL</label><input id="s-github"></div>
+        <div class="form-group"><label>Portfolio URL</label><input id="s-portfolio"></div>
+      </div>
+      <div class="form-group"><label>Key Skills</label><input id="s-skills" placeholder="Java, Spring Boot, Angular, MySQL, Redis, Docker"></div>
+      <div class="form-group"><label>Summary (2-3 lines about you)</label><textarea id="s-summary" placeholder="Brief professional summary..."></textarea></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+        <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Resume Upload</h3>
+      <p style="font-size:12px;color:#64748b;margin-bottom:10px">Upload your resume (PDF). It will be attached when sending email applications.</p>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="file" id="s-resume" accept=".pdf,.doc,.docx" style="font-size:13px">
+        <button class="btn btn-primary" onclick="uploadResume()">Upload</button>
+      </div>
+      <div id="resume-status" style="font-size:12px;color:#94a3b8;margin-top:6px"></div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Email Configuration (SMTP)</h3>
+      <p style="font-size:12px;color:#64748b;margin-bottom:10px">For Gmail: use smtp.gmail.com, port 587, and generate an <a href="https://myaccount.google.com/apppasswords" target="_blank">App Password</a> (not your regular password).</p>
+      <div class="form-row">
+        <div class="form-group"><label>SMTP Host</label><input id="s-smtp-host" value="smtp.gmail.com"></div>
+        <div class="form-group"><label>SMTP Port</label><input id="s-smtp-port" type="number" value="587"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>SMTP User (email)</label><input id="s-smtp-user"></div>
+        <div class="form-group"><label>SMTP Password / App Password</label><input id="s-smtp-pass" type="password"></div>
+      </div>
+      <div class="form-group"><label>From Name</label><input id="s-from-name" placeholder="Shubham Kumar Thakur"></div>
+      <button class="btn btn-primary" onclick="saveEmailConfig()">Save Email Config</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Cover Letter Templates</h3>
+      <p style="font-size:12px;color:#64748b;margin-bottom:10px">
+        Placeholders: <code>{company}</code> <code>{role}</code> <code>{full_name}</code> <code>{email}</code> <code>{phone}</code> <code>{linkedin_url}</code> <code>{github_url}</code> <code>{skills}</code> <code>{experience_years}</code> <code>{summary}</code> <code>{current_role}</code>
+      </p>
+      <div id="template-list"></div>
+      <button class="btn btn-ghost" onclick="openTemplateModal()" style="margin-top:10px">+ Add Template</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Data Backup</h3>
+      <p style="font-size:12px;color:#64748b;margin-bottom:10px">Export/import all your data as JSON. Useful when redeploying.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="exportData()">Export Backup</button>
+        <label class="btn btn-ghost" style="cursor:pointer">Import Backup <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData()"></label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Application Modal -->
+<div class="modal-overlay" id="app-modal">
+  <div class="modal">
+    <h2 id="app-modal-title">Add Application</h2>
+    <input type="hidden" id="app-id">
+    <div class="form-row">
+      <div class="form-group"><label>Company *</label><input id="f-company" required></div>
+      <div class="form-group"><label>Role *</label><input id="f-role"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Platform</label>
+        <select id="f-platform"><option value="">Select...</option><option>Naukri</option><option>LinkedIn</option><option>Wellfound</option><option>Instahyre</option><option>Cutshort</option><option>Weekday</option><option>Company Website</option><option>Referral</option><option>Email</option><option>Other</option></select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="f-status"><option>WISHLIST</option><option>APPLIED</option><option>SCREENING</option><option>INTERVIEW</option><option>OFFER</option><option>REJECTED</option><option>GHOSTED</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Location</label><input id="f-location"></div>
+      <div class="form-group"><label>Salary Range</label><input id="f-salary" placeholder="e.g. 15-20 LPA"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Applied Date</label><input type="date" id="f-applied"></div>
+      <div class="form-group"><label>Interview Date</label><input type="date" id="f-interview"></div>
+    </div>
+    <div class="form-group"><label>Follow-up Date</label><input type="date" id="f-followup"></div>
+    <div class="form-group"><label>Portal URL</label><input id="f-url" placeholder="https://..."></div>
+    <div class="form-group"><label>Notes</label><textarea id="f-notes"></textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('app-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveApp()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Prep Modal -->
+<div class="modal-overlay" id="prep-modal">
+  <div class="modal">
+    <h2>Add Prep Topic</h2>
+    <div class="form-row">
+      <div class="form-group"><label>Category *</label><select id="p-category"><option>DSA</option><option>System Design</option><option>Java/Spring</option><option>Frontend</option><option>Behavioral</option></select></div>
+      <div class="form-group"><label>Difficulty</label><select id="p-difficulty"><option>EASY</option><option selected>MEDIUM</option><option>HARD</option></select></div>
+    </div>
+    <div class="form-group"><label>Topic *</label><input id="p-topic"></div>
+    <div class="form-group"><label>Resource URL</label><input id="p-url" placeholder="https://..."></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('prep-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePrepTopic()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Template Modal -->
+<div class="modal-overlay" id="tpl-modal">
+  <div class="modal">
+    <h2 id="tpl-modal-title">Add Template</h2>
+    <input type="hidden" id="tpl-id">
+    <div class="form-group"><label>Template Name</label><input id="t-name" placeholder="e.g. Startup Application"></div>
+    <div class="form-group"><label>Email Subject</label><input id="t-subject" placeholder="Application for {role} at {company}"></div>
+    <div class="form-group"><label>Body</label><textarea id="t-body" style="min-height:180px" placeholder="Hi {company} Team,..."></textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('tpl-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTemplate()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================== STATE ==============================
+let allApps = [];
+let allPrep = [];
+let allTemplates = [];
+let currentFilter = 'ALL';
+let generatedSubject = '';
+let generatedBody = '';
+
+// ============================== TABS ==============================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelector('.nav-btn[onclick*="' + name + '"]').classList.add('active');
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'applications') loadApplications();
+  if (name === 'prep') loadPrep();
+  if (name === 'quickapply') loadQuickApply();
+  if (name === 'settings') loadSettings();
+  if (name === 'search') initSearch();
+}
+
+// ============================== UTILS ==============================
+function toast(msg, isError) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(function() { t.className = 'toast'; }, 2500);
+}
+
+async function api(url, method, body) {
+  method = method || 'GET';
+  var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  var res = await fetch(url, opts);
+  return res.json();
+}
+
+function esc(s) {
+  if (!s) return '';
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(function(el) {
+  el.addEventListener('click', function(e) { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ============================== DASHBOARD ==============================
+async function loadDashboard() {
+  var data = await Promise.all([api('/api/stats'), api('/api/applications')]);
+  var stats = data[0];
+  allApps = data[1];
+
+  // Follow-up alerts
+  var banner = document.getElementById('followup-banner');
+  if (stats.followUps && stats.followUps.length > 0) {
+    banner.innerHTML = '<div class="alert-banner"><h3>Follow-up Reminders (' + stats.followUps.length + ')</h3>' +
+      stats.followUps.map(function(a) {
+        return '<div class="alert-item">' + esc(a.company) + ' - ' + esc(a.role) + ' (follow up: ' + a.follow_up_date + ')</div>';
+      }).join('') + '</div>';
+  } else {
+    banner.innerHTML = '';
+  }
+
+  var byStatus = {};
+  stats.applicationsByStatus.forEach(function(s) { byStatus[s.status] = s.count; });
+  var prepDone = stats.prepByStatus.find(function(p) { return p.status === 'DONE'; });
+  var prepTotal = stats.prepByStatus.reduce(function(a, p) { return a + p.count; }, 0);
+  var active = (byStatus['APPLIED'] || 0) + (byStatus['SCREENING'] || 0) + (byStatus['INTERVIEW'] || 0);
+
+  var cards = [
+    { num: stats.totalApplications, label: 'Total Apps', color: '#3b82f6' },
+    { num: active, label: 'Active', color: '#a78bfa' },
+    { num: byStatus['INTERVIEW'] || 0, label: 'Interviews', color: '#22c55e' },
+    { num: byStatus['OFFER'] || 0, label: 'Offers', color: '#84cc16' },
+    { num: byStatus['REJECTED'] || 0, label: 'Rejected', color: '#f87171' },
+    { num: (prepDone ? prepDone.count : 0) + '/' + prepTotal, label: 'Prep Done', color: '#fbbf24' },
+  ];
+
+  document.getElementById('stats-grid').innerHTML = cards.map(function(c) {
+    return '<div class="stat-card"><div class="num" style="color:' + c.color + '">' + c.num + '</div><div class="label">' + c.label + '</div></div>';
+  }).join('');
+
+  var recent = allApps.slice(0, 10);
+  document.getElementById('recent-table').innerHTML = recent.length === 0
+    ? '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:32px">No applications yet. Click "+ Add Application" to start!</td></tr>'
+    : recent.map(function(a) {
+      return '<tr><td><strong>' + esc(a.company) + '</strong></td><td>' + esc(a.role) + '</td>' +
+        '<td><span class="badge badge-' + a.status + '">' + a.status + '</span></td>' +
+        '<td>' + esc(a.platform) + '</td><td>' + esc(a.applied_date) + '</td>' +
+        '<td><button class="btn btn-sm btn-ghost" onclick="editApp(' + a.id + ')">Edit</button> ' +
+        '<button class="btn btn-sm btn-danger" onclick="deleteApp(' + a.id + ')">Del</button></td></tr>';
+    }).join('');
+}
+
+// ============================== APPLICATIONS ==============================
+async function loadApplications() {
+  allApps = await api('/api/applications');
+  renderFilters();
+  renderAppsTable();
+}
+
+function renderFilters() {
+  var statuses = ['ALL', 'WISHLIST', 'APPLIED', 'SCREENING', 'INTERVIEW', 'OFFER', 'REJECTED', 'GHOSTED'];
+  document.getElementById('status-filters').innerHTML = statuses.map(function(s) {
+    return '<button class="chip' + (currentFilter === s ? ' active' : '') + '" onclick="setFilter(\'' + s + '\')">' + s + '</button>';
+  }).join('');
+}
+
+function setFilter(s) { currentFilter = s; renderFilters(); renderAppsTable(); }
+
+function renderAppsTable() {
+  var filtered = currentFilter === 'ALL' ? allApps : allApps.filter(function(a) { return a.status === currentFilter; });
+  document.getElementById('apps-table').innerHTML = filtered.length === 0
+    ? '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:32px">No applications found</td></tr>'
+    : filtered.map(function(a) {
+      return '<tr><td><strong>' + esc(a.company) + '</strong></td><td>' + esc(a.role) + '</td>' +
+        '<td>' + esc(a.platform) + '</td><td>' + esc(a.location) + '</td><td>' + esc(a.salary_range) + '</td>' +
+        '<td><span class="badge badge-' + a.status + '">' + a.status + '</span></td>' +
+        '<td>' + esc(a.applied_date) + '</td><td>' + esc(a.follow_up_date) + '</td>' +
+        '<td><button class="btn btn-sm btn-ghost" onclick="editApp(' + a.id + ')">Edit</button> ' +
+        '<button class="btn btn-sm btn-danger" onclick="deleteApp(' + a.id + ')">Del</button></td></tr>';
+    }).join('');
+}
+
+// App CRUD
+function openAppModal(app) {
+  document.getElementById('app-modal-title').textContent = app ? 'Edit Application' : 'Add Application';
+  document.getElementById('app-id').value = app ? app.id : '';
+  document.getElementById('f-company').value = app ? app.company : '';
+  document.getElementById('f-role').value = app ? app.role : '';
+  document.getElementById('f-platform').value = app ? app.platform : '';
+  document.getElementById('f-status').value = app ? app.status : 'APPLIED';
+  document.getElementById('f-location').value = app ? app.location : '';
+  document.getElementById('f-salary').value = app ? app.salary_range : '';
+  document.getElementById('f-applied').value = app ? app.applied_date : new Date().toISOString().split('T')[0];
+  document.getElementById('f-interview').value = app ? app.interview_date : '';
+  document.getElementById('f-followup').value = app ? app.follow_up_date : '';
+  document.getElementById('f-url').value = app ? app.portal_url : '';
+  document.getElementById('f-notes').value = app ? app.notes : '';
+  document.getElementById('app-modal').classList.add('open');
+}
+
+function editApp(id) {
+  var app = allApps.find(function(a) { return a.id === id; });
+  if (app) openAppModal(app);
+}
+
+async function saveApp() {
+  var body = {
+    company: document.getElementById('f-company').value.trim(),
+    role: document.getElementById('f-role').value.trim(),
+    platform: document.getElementById('f-platform').value,
+    status: document.getElementById('f-status').value,
+    location: document.getElementById('f-location').value.trim(),
+    salary_range: document.getElementById('f-salary').value.trim(),
+    applied_date: document.getElementById('f-applied').value,
+    interview_date: document.getElementById('f-interview').value,
+    follow_up_date: document.getElementById('f-followup').value,
+    portal_url: document.getElementById('f-url').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+  if (!body.company || !body.role) return toast('Company and Role are required', true);
+  var id = document.getElementById('app-id').value;
+  if (id) {
+    await api('/api/applications/' + id, 'PUT', body);
+    toast('Application updated');
+  } else {
+    await api('/api/applications', 'POST', body);
+    toast('Application added');
+  }
+  closeModal('app-modal');
+  loadDashboard();
+  if (document.getElementById('tab-applications').classList.contains('active')) loadApplications();
+}
+
+async function deleteApp(id) {
+  if (!confirm('Delete this application?')) return;
+  await api('/api/applications/' + id, 'DELETE');
+  toast('Deleted');
+  loadDashboard();
+  if (document.getElementById('tab-applications').classList.contains('active')) loadApplications();
+}
+
+// ============================== JOB SEARCH ==============================
+function initSearch() {
+  updatePortalLinks();
+}
+
+function updatePortalLinks() {
+  var kw = document.getElementById('search-keywords').value.trim() || 'Software Engineer';
+  var loc = document.getElementById('search-location').value.trim() || 'India';
+  var kwEnc = encodeURIComponent(kw);
+  var locEnc = encodeURIComponent(loc);
+  var kwDash = kw.replace(/\s+/g, '-');
+  var locDash = loc.replace(/\s+/g, '-');
+
+  var portals = [
+    { name: 'LinkedIn', url: 'https://www.linkedin.com/jobs/search/?keywords=' + kwEnc + '&location=' + locEnc },
+    { name: 'Naukri', url: 'https://www.naukri.com/' + kwDash + '-jobs-in-' + locDash },
+    { name: 'Indeed', url: 'https://in.indeed.com/jobs?q=' + kwEnc + '&l=' + locEnc },
+    { name: 'Wellfound', url: 'https://wellfound.com/jobs?query=' + kwEnc },
+    { name: 'Instahyre', url: 'https://www.instahyre.com/search-jobs/?search=' + kwEnc + '&location=' + locEnc },
+    { name: 'Cutshort', url: 'https://cutshort.io/jobs?q=' + kwEnc },
+    { name: 'Glassdoor', url: 'https://www.glassdoor.co.in/Job/jobs.htm?sc.keyword=' + kwEnc + '&locKeyword=' + locEnc },
+  ];
+
+  document.getElementById('portal-links').innerHTML = portals.map(function(p) {
+    return '<a class="portal-link" href="' + p.url + '" target="_blank">' + p.name + ' &rarr;</a>';
+  }).join('');
+}
+
+// Listen for input changes to update portal links
+document.getElementById('search-keywords').addEventListener('input', updatePortalLinks);
+document.getElementById('search-location').addEventListener('input', updatePortalLinks);
+document.getElementById('search-keywords').addEventListener('keydown', function(e) { if (e.key === 'Enter') searchJobs(); });
+
+async function searchJobs() {
+  var kw = document.getElementById('search-keywords').value.trim();
+  if (!kw) return toast('Enter keywords to search', true);
+  document.getElementById('search-results').innerHTML = '<p style="color:#94a3b8;padding:20px;text-align:center">Searching remote jobs...</p>';
+  document.getElementById('search-empty').style.display = 'none';
+
+  try {
+    var res = await fetch('https://remotive.com/api/remote-jobs?search=' + encodeURIComponent(kw) + '&limit=25');
+    var data = await res.json();
+    var jobs = data.jobs || [];
+
+    if (jobs.length === 0) {
+      document.getElementById('search-results').innerHTML = '<p style="color:#64748b;padding:20px;text-align:center">No remote jobs found for "' + esc(kw) + '". Try the portal links above to search on Indian job sites.</p>';
+      return;
+    }
+
+    document.getElementById('search-results').innerHTML = '<p style="font-size:12px;color:#64748b;margin-bottom:10px">' + jobs.length + ' remote jobs found via Remotive. Use the portal links above for India-specific jobs.</p>' +
+      jobs.map(function(j) {
+        var tags = (j.tags || []).slice(0, 5).map(function(t) { return '<span class="badge badge-APPLIED" style="margin-right:4px">' + esc(t) + '</span>'; }).join('');
+        return '<div class="job-card">' +
+          '<h3>' + esc(j.title) + '</h3>' +
+          '<div class="meta">' + esc(j.company_name) + ' &bull; ' + esc(j.candidate_required_location || 'Remote') + (j.salary ? ' &bull; ' + esc(j.salary) : '') + '</div>' +
+          (tags ? '<div style="margin-bottom:8px">' + tags + '</div>' : '') +
+          '<div class="actions">' +
+          '<a class="btn btn-sm btn-primary" href="' + esc(j.url) + '" target="_blank">View & Apply</a> ' +
+          '<button class="btn btn-sm btn-success" onclick="saveJobFromSearch(\'' + esc(j.company_name).replace(/'/g, "\\'") + '\',\'' + esc(j.title).replace(/'/g, "\\'") + '\',\'' + esc(j.url) + '\',\'' + esc(j.candidate_required_location || 'Remote').replace(/'/g, "\\'") + '\',\'' + esc(j.salary || '').replace(/'/g, "\\'") + '\')">+ Save to Tracker</button> ' +
+          '<button class="btn btn-sm btn-ghost" onclick="quickApplyFromSearch(\'' + esc(j.company_name).replace(/'/g, "\\'") + '\',\'' + esc(j.title).replace(/'/g, "\\'") + '\',\'' + esc(j.url) + '\')">Quick Apply</button>' +
+          '</div></div>';
+      }).join('');
+  } catch (err) {
+    document.getElementById('search-results').innerHTML = '<p style="color:#f87171;padding:20px;text-align:center">Search failed: ' + esc(err.message) + '. Use the portal links above instead.</p>';
+  }
+}
+
+function saveJobFromSearch(company, role, url, location, salary) {
+  document.getElementById('f-company').value = company;
+  document.getElementById('f-role').value = role;
+  document.getElementById('f-url').value = url;
+  document.getElementById('f-location').value = location;
+  document.getElementById('f-salary').value = salary;
+  document.getElementById('f-platform').value = 'Other';
+  document.getElementById('f-status').value = 'WISHLIST';
+  document.getElementById('f-applied').value = '';
+  document.getElementById('f-interview').value = '';
+  document.getElementById('f-followup').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('app-id').value = '';
+  document.getElementById('app-modal-title').textContent = 'Save Job to Tracker';
+  document.getElementById('app-modal').classList.add('open');
+}
+
+function quickApplyFromSearch(company, role, url) {
+  switchTab('quickapply');
+  document.getElementById('qa-company').value = company;
+  document.getElementById('qa-role').value = role;
+  document.getElementById('qa-url').value = url;
+}
+
+// ============================== QUICK APPLY ==============================
+async function loadQuickApply() {
+  allTemplates = await api('/api/templates');
+  var sel = document.getElementById('qa-template');
+  sel.innerHTML = allTemplates.map(function(t) {
+    return '<option value="' + t.id + '">' + esc(t.name) + '</option>';
+  }).join('');
+}
+
+async function generateCover() {
+  var company = document.getElementById('qa-company').value.trim();
+  var role = document.getElementById('qa-role').value.trim();
+  var tplId = document.getElementById('qa-template').value;
+  if (!company || !role) return toast('Enter company and role', true);
+  if (!tplId) return toast('No template available. Add one in Settings.', true);
+
+  var result = await api('/api/generate-cover', 'POST', { template_id: parseInt(tplId), company: company, role: role });
+  if (result.error) return toast(result.error, true);
+
+  generatedSubject = result.subject;
+  generatedBody = result.body;
+  document.getElementById('qa-subject').textContent = result.subject;
+  document.getElementById('qa-body').textContent = result.body;
+  document.getElementById('qa-preview').style.display = 'block';
+  toast('Cover letter generated!');
+}
+
+function copyCover() {
+  if (!generatedBody) return toast('Generate a cover letter first', true);
+  navigator.clipboard.writeText(generatedBody).then(function() { toast('Copied to clipboard!'); });
+}
+
+function openApplyUrl() {
+  var url = document.getElementById('qa-url').value.trim();
+  if (!url) return toast('No apply URL specified', true);
+  window.open(url, '_blank');
+}
+
+async function saveAndTrack() {
+  var company = document.getElementById('qa-company').value.trim();
+  var role = document.getElementById('qa-role').value.trim();
+  var url = document.getElementById('qa-url').value.trim();
+  if (!company || !role) return toast('Enter company and role', true);
+
+  await api('/api/applications', 'POST', {
+    company: company, role: role, portal_url: url,
+    status: 'APPLIED', platform: 'Other',
+    applied_date: new Date().toISOString().split('T')[0],
+    follow_up_date: getFutureDate(7)
+  });
+  toast('Saved to applications with 7-day follow-up!');
+}
+
+function getFutureDate(days) {
+  var d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+async function sendEmailApply() {
+  var to = document.getElementById('qa-email-to').value.trim();
+  if (!to) return toast('Enter recipient email', true);
+  if (!generatedSubject || !generatedBody) return toast('Generate a cover letter first', true);
+
+  var attachResume = document.getElementById('qa-attach-resume').checked;
+  toast('Sending...');
+
+  var result = await api('/api/send-email', 'POST', {
+    to: to, subject: generatedSubject, body: generatedBody, attachResume: attachResume
+  });
+  if (result.error) return toast('Email failed: ' + result.error, true);
+  toast('Email sent successfully!');
+
+  // Auto-save to applications
+  var company = document.getElementById('qa-company').value.trim();
+  var role = document.getElementById('qa-role').value.trim();
+  if (company && role) {
+    await api('/api/applications', 'POST', {
+      company: company, role: role, platform: 'Email',
+      status: 'APPLIED', applied_date: new Date().toISOString().split('T')[0],
+      follow_up_date: getFutureDate(7), notes: 'Applied via email to ' + to
+    });
+  }
+}
+
+// ============================== INTERVIEW PREP ==============================
+async function loadPrep() {
+  allPrep = await api('/api/prep');
+  var total = allPrep.length;
+  var done = allPrep.filter(function(t) { return t.status === 'DONE'; }).length;
+  var pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('prep-progress-label').textContent = done + ' / ' + total + ' completed (' + pct + '%)';
+  document.getElementById('prep-progress-fill').style.width = pct + '%';
+
+  var groups = {};
+  allPrep.forEach(function(t) { if (!groups[t.category]) groups[t.category] = []; groups[t.category].push(t); });
+
+  document.getElementById('prep-list').innerHTML = Object.keys(groups).map(function(cat) {
+    return '<div class="prep-category"><h3>' + esc(cat) + '</h3>' +
+      groups[cat].map(function(t) {
+        return '<div class="prep-item" onclick="cyclePrepStatus(' + t.id + ',\'' + t.status + '\')">' +
+          '<span class="badge badge-' + t.status + '">' + t.status + '</span>' +
+          '<span class="topic-name">' + esc(t.topic) + '</span>' +
+          '<span class="badge badge-' + t.difficulty + '">' + t.difficulty + '</span>' +
+          (t.resource_url ? '<a class="resource-link" href="' + esc(t.resource_url) + '" target="_blank" onclick="event.stopPropagation()">Link</a>' : '') +
+          '</div>';
+      }).join('') + '</div>';
+  }).join('');
+}
+
+async function cyclePrepStatus(id, current) {
+  var next = current === 'TODO' ? 'REVIEW' : current === 'REVIEW' ? 'DONE' : 'TODO';
+  await api('/api/prep/' + id, 'PUT', { status: next, notes: '' });
+  loadPrep();
+}
+
+function openPrepModal() {
+  document.getElementById('p-topic').value = '';
+  document.getElementById('p-url').value = '';
+  document.getElementById('prep-modal').classList.add('open');
+}
+
+async function savePrepTopic() {
+  var body = { category: document.getElementById('p-category').value, topic: document.getElementById('p-topic').value.trim(), difficulty: document.getElementById('p-difficulty').value, resource_url: document.getElementById('p-url').value.trim() };
+  if (!body.topic) return toast('Topic is required', true);
+  await api('/api/prep', 'POST', body);
+  toast('Topic added');
+  closeModal('prep-modal');
+  loadPrep();
+}
+
+// ============================== RESOURCES ==============================
+var resources = [
+  { name: 'Naukri', url: 'https://www.naukri.com', desc: "India's #1 job portal" },
+  { name: 'LinkedIn Jobs', url: 'https://www.linkedin.com/jobs/', desc: 'Professional network & jobs' },
+  { name: 'Wellfound', url: 'https://wellfound.com', desc: 'Startup jobs (AngelList)' },
+  { name: 'Instahyre', url: 'https://www.instahyre.com', desc: 'Curated tech jobs India' },
+  { name: 'Cutshort', url: 'https://cutshort.io', desc: 'AI-powered job matching' },
+  { name: 'Weekday', url: 'https://www.weekday.works', desc: 'Referral-based job search' },
+  { name: 'LeetCode', url: 'https://leetcode.com', desc: 'DSA practice & contests' },
+  { name: 'NeetCode', url: 'https://neetcode.io', desc: 'Curated DSA roadmap' },
+  { name: 'System Design Primer', url: 'https://github.com/donnemartin/system-design-primer', desc: 'System design prep (GitHub)' },
+  { name: 'Baeldung', url: 'https://www.baeldung.com', desc: 'Java & Spring Boot tutorials' },
+];
+
+function renderResources() {
+  document.getElementById('resource-grid').innerHTML = resources.map(function(r) {
+    return '<a href="' + r.url + '" target="_blank" class="card"><h3>' + r.name + '</h3><p>' + r.desc + '</p></a>';
+  }).join('');
+}
+
+// ============================== SETTINGS ==============================
+async function loadSettings() {
+  var data = await Promise.all([api('/api/profile'), api('/api/email-config'), api('/api/templates'), api('/api/resume-info')]);
+  var p = data[0]; var e = data[1]; allTemplates = data[2]; var r = data[3];
+
+  document.getElementById('s-name').value = p.full_name || '';
+  document.getElementById('s-email').value = p.email || '';
+  document.getElementById('s-phone').value = p.phone || '';
+  document.getElementById('s-current-role').value = p.current_role || '';
+  document.getElementById('s-exp').value = p.experience_years || '';
+  document.getElementById('s-linkedin').value = p.linkedin_url || '';
+  document.getElementById('s-github').value = p.github_url || '';
+  document.getElementById('s-portfolio').value = p.portfolio_url || '';
+  document.getElementById('s-skills').value = p.skills || '';
+  document.getElementById('s-summary').value = p.summary || '';
+
+  document.getElementById('s-smtp-host').value = e.smtp_host || 'smtp.gmail.com';
+  document.getElementById('s-smtp-port').value = e.smtp_port || 587;
+  document.getElementById('s-smtp-user').value = e.smtp_user || '';
+  document.getElementById('s-smtp-pass').value = e.smtp_pass || '';
+  document.getElementById('s-from-name').value = e.from_name || '';
+
+  document.getElementById('resume-status').textContent = r.exists ? 'Uploaded: ' + r.filename : 'No resume uploaded';
+
+  renderTemplateList();
+}
+
+async function saveProfile() {
+  await api('/api/profile', 'PUT', {
+    full_name: document.getElementById('s-name').value.trim(),
+    email: document.getElementById('s-email').value.trim(),
+    phone: document.getElementById('s-phone').value.trim(),
+    linkedin_url: document.getElementById('s-linkedin').value.trim(),
+    github_url: document.getElementById('s-github').value.trim(),
+    portfolio_url: document.getElementById('s-portfolio').value.trim(),
+    current_role: document.getElementById('s-current-role').value.trim(),
+    experience_years: document.getElementById('s-exp').value.trim(),
+    skills: document.getElementById('s-skills').value.trim(),
+    summary: document.getElementById('s-summary').value.trim(),
+  });
+  toast('Profile saved');
+}
+
+async function uploadResume() {
+  var input = document.getElementById('s-resume');
+  if (!input.files || !input.files[0]) return toast('Select a file', true);
+  var fd = new FormData();
+  fd.append('resume', input.files[0]);
+  var res = await fetch('/api/resume', { method: 'POST', body: fd });
+  var data = await res.json();
+  if (data.error) return toast(data.error, true);
+  document.getElementById('resume-status').textContent = 'Uploaded: ' + data.filename;
+  toast('Resume uploaded');
+}
+
+async function saveEmailConfig() {
+  await api('/api/email-config', 'PUT', {
+    smtp_host: document.getElementById('s-smtp-host').value.trim(),
+    smtp_port: parseInt(document.getElementById('s-smtp-port').value) || 587,
+    smtp_user: document.getElementById('s-smtp-user').value.trim(),
+    smtp_pass: document.getElementById('s-smtp-pass').value,
+    from_name: document.getElementById('s-from-name').value.trim(),
+  });
+  toast('Email config saved');
+}
+
+// Templates
+function renderTemplateList() {
+  document.getElementById('template-list').innerHTML = allTemplates.length === 0
+    ? '<p style="color:#64748b;font-size:13px">No templates yet.</p>'
+    : allTemplates.map(function(t) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #334155">' +
+        '<span style="flex:1;font-size:13px">' + esc(t.name) + '</span>' +
+        '<button class="btn btn-sm btn-ghost" onclick="editTemplate(' + t.id + ')">Edit</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="deleteTemplate(' + t.id + ')">Del</button></div>';
+    }).join('');
+}
+
+function openTemplateModal(tpl) {
+  document.getElementById('tpl-modal-title').textContent = tpl ? 'Edit Template' : 'Add Template';
+  document.getElementById('tpl-id').value = tpl ? tpl.id : '';
+  document.getElementById('t-name').value = tpl ? tpl.name : '';
+  document.getElementById('t-subject').value = tpl ? tpl.subject : '';
+  document.getElementById('t-body').value = tpl ? tpl.body : '';
+  document.getElementById('tpl-modal').classList.add('open');
+}
+
+function editTemplate(id) {
+  var tpl = allTemplates.find(function(t) { return t.id === id; });
+  if (tpl) openTemplateModal(tpl);
+}
+
+async function saveTemplate() {
+  var body = {
+    name: document.getElementById('t-name').value.trim(),
+    subject: document.getElementById('t-subject').value.trim(),
+    body: document.getElementById('t-body').value,
+  };
+  if (!body.name) return toast('Template name is required', true);
+  var id = document.getElementById('tpl-id').value;
+  if (id) {
+    await api('/api/templates/' + id, 'PUT', body);
+    toast('Template updated');
+  } else {
+    await api('/api/templates', 'POST', body);
+    toast('Template added');
+  }
+  closeModal('tpl-modal');
+  allTemplates = await api('/api/templates');
+  renderTemplateList();
+}
+
+async function deleteTemplate(id) {
+  if (!confirm('Delete this template?')) return;
+  await api('/api/templates/' + id, 'DELETE');
+  allTemplates = await api('/api/templates');
+  renderTemplateList();
+  toast('Template deleted');
+}
+
+// ============================== BACKUP ==============================
+function exportData() {
+  window.open('/api/export', '_blank');
+  toast('Downloading backup...');
+}
+
+function importData() {
+  var file = document.getElementById('import-file').files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!confirm('This will REPLACE all current data. Continue?')) return;
+      var result = await api('/api/import', 'POST', data);
+      if (result.error) return toast('Import failed: ' + result.error, true);
+      toast('Data imported! Refreshing...');
+      setTimeout(function() { location.reload(); }, 1000);
+    } catch (err) {
+      toast('Invalid file: ' + err.message, true);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ============================== INIT ==============================
+loadDashboard();
+renderResources();
+</script>
+</body>
+</html>
